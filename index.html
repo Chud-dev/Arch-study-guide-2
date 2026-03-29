@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANT 304 – Exam 2 Study Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; padding: 1.5rem; }
+  h1 { font-size: 1.3rem; font-weight: 600; margin-bottom: 0.25rem; }
+  .subtitle { font-size: 0.85rem; color: #666; margin-bottom: 1.25rem; }
+  .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 1.25rem; align-items: center; }
+  select, input { font-size: 13px; padding: 7px 12px; border: 1px solid #ddd; border-radius: 8px; background: #fff; color: #1a1a1a; }
+  input { width: 200px; }
+  .mode-toggle { display: flex; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; background: #fff; }
+  .mode-btn { font-size: 12px; padding: 7px 14px; border: none; background: transparent; cursor: pointer; color: #555; font-weight: 500; }
+  .mode-btn.active { background: #1a1a1a; color: #fff; }
+  .count { font-size: 13px; color: #888; margin-left: auto; }
+  .section-header { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #888; margin: 1.5rem 0 0.6rem; padding-left: 4px; }
+  .section-header:first-child { margin-top: 0; }
+  .term-card { background: #fff; border: 1px solid #e8e8e3; border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: 8px; }
+  .card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .num { font-size: 11px; color: #bbb; min-width: 22px; padding-top: 2px; }
+  .name { font-size: 14px; font-weight: 600; flex: 1; }
+  .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; white-space: nowrap; font-weight: 500; }
+  .social    { background: #e8f0fe; color: #1a56a0; }
+  .env       { background: #e6f4ea; color: #1e6e3a; }
+  .food      { background: #fef3e2; color: #a05a00; }
+  .agri      { background: #f0ebe8; color: #7a4030; }
+  .tech      { background: #f3eefe; color: #5a30a8; }
+  .trade     { background: #fce8f3; color: #9a2060; }
+  .def-block { margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: 8px; font-size: 13px; line-height: 1.65; }
+  .simple-block { background: #f0f4ff; border-left: 3px solid #5b8dee; color: #1a1a1a; }
+  .detail-block { background: #f0faf4; border-left: 3px solid #3aaa68; color: #1a1a1a; }
+  .def-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; color: #888; }
+  .hidden { display: none; }
+  .no-results { text-align: center; color: #999; padding: 2rem; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>ANT 304 – Exam 2 Study Guide</h1>
+<p class="subtitle">51 terms · Click a mode to switch between simple (notecard) and detailed definitions</p>
+
+<div class="controls">
+  <div class="mode-toggle">
+    <button class="mode-btn active" onclick="setMode('both')" id="btn-both">Both</button>
+    <button class="mode-btn" onclick="setMode('simple')" id="btn-simple">Notecard</button>
+    <button class="mode-btn" onclick="setMode('detail')" id="btn-detail">Detailed</button>
+  </div>
+  <select id="sectionFilter" onchange="render()">
+    <option value="all">All sections</option>
+    <option value="Social Organization">Social Organization</option>
+    <option value="Environmental Archaeology">Environmental Archaeology</option>
+    <option value="Food">Food</option>
+    <option value="Agriculture">Agriculture</option>
+    <option value="Technology">Technology</option>
+    <option value="Trade">Trade</option>
+  </select>
+  <input type="text" id="searchBox" placeholder="Search terms…" oninput="render()">
+  <span class="count" id="countLabel">51 terms</span>
+</div>
+
+<div id="output"></div>
+
+<script>
+const terms = [
+  // Social Organization
+  { num:1, name:"Qafzeh Cave", section:"Social Organization",
+    simple:"A ~100,000-year-old cave site in Israel with early H. sapiens remains. Famous for intentional burials with grave goods (ochre, shells), indicating early symbolic and social behavior.",
+    detail:"Qafzeh Cave pushes evidence of complex human behavior back far earlier than European sites. Individuals were buried deliberately, some with perforated shells and red ochre — materials with no practical purpose in a burial. This implies abstract thinking, ritual, and possibly belief in an afterlife. It's a key site for understanding the origins of social identity and the transition from biological evolution to cultural evolution." },
+
+  { num:2, name:"Band", section:"Social Organization",
+    simple:"The smallest, most egalitarian human social unit — typically 20–50 related individuals, mobile, with no permanent leaders.",
+    detail:"Bands are the foundational social structure of hunter-gatherers and represent the baseline of human social organization for most of our species' history. Because food and resources are shared and everyone contributes, power differences are minimal and leadership is situational (e.g., the best hunter leads the hunt, but holds no permanent authority). Archaeologically, bands leave behind small campsites, portable toolkits, and little evidence of status differences in burials." },
+
+  { num:3, name:"Hunter-Gatherer", section:"Social Organization",
+    simple:"A subsistence strategy based on hunting wild animals and gathering wild plants — no food production. The universal human lifestyle until ~10,000 years ago.",
+    detail:"Hunter-gatherer lifeways shaped human biology, cognition, and social structure for hundreds of thousands of years. Mobility, small group size, and seasonal resource use are hallmarks. Archaeologists study HG societies through site distribution, faunal and botanical remains, and lithic assemblages. Important: HG societies are NOT primitive — many show sophisticated planning, trade, and symbolic behavior. Understanding HG life is essential context before studying the shift to agriculture." },
+
+  { num:4, name:"Ethnic Group", section:"Social Organization",
+    simple:"A group sharing a common cultural identity — language, ancestry, customs. Socially constructed, not biological.",
+    detail:"Ethnicity is relational and self-defined, making it one of the hardest things to detect in the archaeological record. The key challenge: material culture does not map neatly onto ethnic identity. Two ethnically distinct groups can share the same pottery style, or one group can produce very different artifacts across regions. Archaeologists must avoid the 'pots equal people' fallacy — assuming that a shared artifact style means a shared ethnic identity." },
+
+  { num:5, name:"Culture", section:"Social Organization",
+    simple:"Shared, learned behaviors, beliefs, values, and practices passed across generations within a group. The 'software' of society.",
+    detail:"In anthropology, culture is everything non-biological that humans learn and share — language, religion, kinship rules, food customs, art, and technology. It is transmitted socially, not genetically. Because culture is learned and shared, similar artifacts across sites can signal cultural contact or common heritage. Reconstructing past cultures from material remains is the central challenge — and goal — of archaeology." },
+
+  { num:6, name:"Archaeological Culture", section:"Social Organization",
+    simple:"A recurring assemblage of artifacts found together in the same time and place, used as a proxy for a past group of people (e.g., 'Clovis culture').",
+    detail:"Archaeological cultures are analytical constructs, not real social groups. When archaeologists find the same combination of pottery styles, burial practices, and tool types recurring across many sites in the same region and period, they label this an 'archaeological culture.' The danger is treating it as equivalent to an ethnic group or society. In reality, shared material patterns can arise from trade, imitation, or migration — not just a single, bounded group." },
+
+  { num:7, name:"Sunghir, Russia", section:"Social Organization",
+    simple:"A ~30,000-year-old Upper Paleolithic burial site where two children were interred with thousands of mammoth ivory beads — far more than adults — suggesting inherited (ascribed) high status.",
+    detail:"Sunghir is one of the most important sites for understanding Paleolithic social complexity. The elaborate child burials (one boy ~12–13, one girl ~9–10) were covered in thousands of hand-carved ivory beads representing hundreds of hours of labor. Because children could not have earned such status, it must have been inherited — one of the earliest clear archaeological signals of ascribed status and hereditary inequality in human societies." },
+
+  { num:8, name:"Achieved vs. Ascribed Status", section:"Social Organization",
+    simple:"Achieved status = earned through skill or effort. Ascribed status = inherited from birth (e.g., children buried with lavish goods like at Sunghir).",
+    detail:"This distinction is central to understanding the evolution of social inequality. In egalitarian band societies, status is achieved — the best hunter earns respect, but it doesn't transfer to their children. As populations grow and resources become controlled, ascribed status emerges: inequality becomes institutionalized across generations. Archaeologically, the clearest marker of ascribed status is lavish child burials — children couldn't earn wealth, so inherited it. The emergence of ascribed status signals a fundamental shift in social organization toward hereditary hierarchy." },
+
+  // Environmental Archaeology
+  { num:9, name:"Beringia", section:"Environmental Archaeology",
+    simple:"A now-submerged land bridge connecting Siberia to Alaska during the Pleistocene (when sea levels were lower). The primary proposed route for the first peopling of the Americas.",
+    detail:"Beringia wasn't a narrow bridge — at its maximum it was over 1,500 km wide, a vast steppe-tundra ecosystem. During glacial periods, sea levels dropped ~120m, exposing this landmass. Humans and megafauna moved across it over thousands of years. The key tension: the inland ice-free corridor didn't open until ~13,000 years ago, but pre-Clovis sites predate this, suggesting some migrants may have moved by coast rather than through the interior." },
+
+  { num:10, name:"Kelp Highway Hypothesis", section:"Environmental Archaeology",
+    simple:"Theory that early Americans migrated south by boat along the Pacific coast, sustained by rich kelp forest ecosystems. Explains pre-Clovis sites that predate the inland ice-free corridor.",
+    detail:"Kelp forests are among Earth's most productive marine ecosystems, providing shellfish, fish, sea mammals, and birds — a reliable food source that could sustain coastal migrants. This hypothesis argues that people moved rapidly southward by watercraft along the coast before glaciers retreated inland. It neatly explains why sites like Monte Verde (Chile, ~14,500 BP) predate the opening of the ice-free corridor. The main challenge: most coastal evidence would now be underwater, making direct testing very difficult." },
+
+  { num:11, name:"Clovis-First Hypothesis", section:"Environmental Archaeology",
+    simple:"The older theory that Clovis people (makers of distinctive fluted stone points, ~13,000 BP) were the first Americans, arriving via Beringia.",
+    detail:"Clovis points — large, bifacially flaked, fluted projectile points — were for decades found only at the earliest American sites, leading archaeologists to conclude they represented the founding population. The hypothesis has been largely overturned. Sites like Page-Ladson (FL) and Monte Verde (Chile) clearly predate Clovis, forcing a rethink. Today, Clovis is understood as one early culture, not the first, and debate has shifted to coastal vs. inland routes and timing of multiple migration waves." },
+
+  { num:12, name:"Page-Ladson, USA", section:"Environmental Archaeology",
+    simple:"A submerged site in Florida (~14,550 years old) with mastodon bones bearing cut marks and associated stone tools — strong evidence of pre-Clovis human occupation of the Americas.",
+    detail:"Page-Ladson is in the Aucilla River, Florida, and is significant precisely because it is unambiguously pre-Clovis. Cut-marked mastodon bones alongside stone tools push human presence in the southeastern U.S. back ~1,500 years before Clovis. The site's underwater context also illustrates how much archaeological evidence from the peopling of the Americas may now lie beneath the ocean, a key methodological challenge." },
+
+  { num:13, name:"Palynology", section:"Environmental Archaeology",
+    simple:"The study of fossil pollen and spores to reconstruct past vegetation and climate environments.",
+    detail:"Pollen grains are remarkably durable — they can survive in sediments for millions of years. By coring lake beds and bogs and identifying the pollen species preserved at each layer, palynologists can reconstruct what plants grew in a region across time, and therefore what the climate was like. For archaeologists, pollen cores help understand the environmental context of past human societies: what resources were available, how climate changed, and how humans altered their landscapes (e.g., deforestation pollen signals agriculture)." },
+
+  { num:14, name:"Phytolith", section:"Environmental Archaeology",
+    simple:"Microscopic silica bodies formed in plant cells that preserve in soil after the plant decays. Used to identify plant species at archaeological sites.",
+    detail:"When plants take up silica from groundwater, it fills the spaces within their cells, forming tiny mineral casts (phytoliths) that retain the shape of the cell. After the plant dies, these survive in sediment. Each plant produces distinctive phytolith shapes, so archaeologists can identify specific species — grasses, reeds, trees — even when no macroscopic plant remains survive. Phytoliths are especially important for identifying early crop plants and detecting agricultural activity." },
+
+  { num:15, name:"Microbotanicals", section:"Environmental Archaeology",
+    simple:"Microscopic plant remains — including pollen, phytoliths, and starch grains — used to reconstruct past environments and diet.",
+    detail:"Microbotanicals are essential when macroscopic (visible) plant remains are absent. Starch grains, for example, can survive on stone tools and in dental calculus, allowing researchers to identify what plants people processed or ate. Pollen and phytoliths reveal environmental context. Because they're microscopic, they are easily overlooked but can survive under conditions that destroy larger organic material, making them critical lines of evidence for diet, agriculture, and paleoenvironments." },
+
+  // Food
+  { num:16, name:"Subsistence Method", section:"Food",
+    simple:"The strategy a group uses to obtain food — hunting, gathering, fishing, farming, herding, or combinations thereof.",
+    detail:"Subsistence method is one of the most fundamental variables in archaeology because it shapes nearly everything else: settlement patterns, group size, social organization, technology, and health. Shifts in subsistence (e.g., from foraging to farming) are among the most transformative events in human prehistory. Archaeologists reconstruct subsistence from faunal remains, botanical remains, isotope analysis of human bones, and site location." },
+
+  { num:17, name:"Diet", section:"Food",
+    simple:"The actual foods consumed by a group, reconstructed from food remains, dental wear, and isotope analysis of human remains.",
+    detail:"Diet differs from subsistence method — subsistence is the strategy, diet is what people actually ate. Archaeologists reconstruct diet through multiple lines of evidence: faunal and botanical assemblages show what was available and processed; dental calculus can contain microbotanicals and proteins; stable isotope analysis (carbon, nitrogen) of human bone collagen reflects dietary intake over years; and dental wear patterns indicate food texture. Diet has major implications for health, status, and social identity." },
+
+  { num:18, name:"Macrobotanicals", section:"Food",
+    simple:"Visible plant remains — seeds, charred wood, nuts, and fruit fragments — recovered from archaeological sites.",
+    detail:"Macrobotanicals are the most direct evidence of plant use at a site. They are typically preserved through charring (burning protects organic material from decomposition), waterlogging, or desiccation. Flotation is the primary recovery method. Macrobotanicals can tell us what plants were eaten, cultivated, or used as fuel. They are essential for tracking the origins and spread of agriculture — early domesticated crops (wheat, barley, maize) leave distinct macrobotanical signatures." },
+
+  { num:19, name:"Flotation", section:"Food",
+    simple:"A recovery technique where soil is placed in water, allowing light plant remains (seeds, charcoal) to float to the surface for collection and analysis.",
+    detail:"Flotation revolutionized the recovery of botanical remains in archaeology. Before its widespread adoption in the 1960s–70s, tiny seeds and charred plant fragments were almost entirely missed during excavation. In water flotation, soil is agitated in water; light materials (the 'light fraction' — seeds, charcoal, small bones) float and are caught in mesh; heavier materials (the 'heavy fraction' — pottery, lithics, bone fragments) sink. This technique dramatically increased archaeologists' ability to study ancient diet and plant use." },
+
+  { num:20, name:"Hearth", section:"Food",
+    simple:"A fire feature at an archaeological site — one of the earliest indicators of food preparation, warmth, and social gathering.",
+    detail:"Hearths are among the most significant features an archaeologist can find. They mark repeated human presence, controlled fire use, and food cooking. Dating hearths (via radiocarbon or thermoluminescence) provides direct site chronology. The remains around hearths — charred bone, plant ash, lithic debris — reconstruct what people ate and how they processed food. Hearths are also central to social life: they are gathering points that structure domestic space." },
+
+  { num:21, name:"Coprolite", section:"Food",
+    simple:"Fossilized or desiccated feces. Contains direct evidence of diet — plant remains, bone fragments, parasites, and pollen — from the individual who produced it.",
+    detail:"Coprolites are one of the most direct windows into ancient diet. Unlike food debris scattered around a site (which may be refuse, offerings, or accidentally deposited), coprolites definitively represent what was consumed and digested. Analysis can recover seeds, pollen, phytoliths, bone fragments, hair, parasites, and even ancient DNA of gut bacteria. They can also reveal health conditions such as intestinal parasites, and sometimes confirm the species that produced them." },
+
+  { num:22, name:"Zooarchaeology", section:"Food",
+    simple:"The study of animal remains from archaeological sites to understand diet, hunting practices, domestication, environment, and economy.",
+    detail:"Zooarchaeology (also called archaeozoology) analyzes bones, teeth, shells, scales, and other animal-derived remains. Researchers identify species, quantify abundance, assess age and sex of animals, and look for cut marks, burning, or marrow extraction that indicate human processing. Zooarchaeologists can reconstruct hunting strategies, herding practices, seasonality of site use, and the transition from wild to domestic animals — all fundamental to understanding past economies and lifeways." },
+
+  { num:23, name:"Faunal Remains", section:"Food",
+    simple:"Animal remains (bones, teeth, shells, scales) recovered from archaeological sites. Primary data for zooarchaeology.",
+    detail:"Faunal remains are analyzed quantitatively using measures like NISP (Number of Identified Specimens) and MNI (Minimum Number of Individuals) to estimate species representation. Taphonomy — the study of how remains entered and were modified in the archaeological record — is essential: did humans deposit the bones, or carnivores? Cut marks indicate butchery; burning suggests cooking; gnaw marks suggest carnivore scavenging. Shellmiddens are a major category of faunal assemblage that also record sea-level and climate data." },
+
+  { num:24, name:"Osteoarchaeology", section:"Food",
+    simple:"The study of human skeletal remains from archaeological sites — reconstructing age, sex, health, diet, activity patterns, and social identity.",
+    detail:"Osteoarchaeology bridges biological anthropology and archaeology. Human bones preserve a remarkable record: bone density and isotopes reflect diet; dental enamel defects (hypoplasia) signal childhood stress or illness; entheseal changes (where muscles attach) indicate repetitive activity; trauma patterns reveal violence or accidents; and grave context informs social status. Isotope analysis can even reconstruct migration — where a person grew up versus where they died." },
+
+  { num:25, name:"Fa-Hien Lena, Sri Lanka", section:"Food",
+    simple:"A cave site in Sri Lanka (~48,000 years old) with evidence of early bow-and-arrow use and specialized hunting of small, fast forest animals — pushing back complex projectile technology.",
+    detail:"Fa-Hien Lena is one of the oldest sites in South Asia and contains some of the earliest evidence for bone projectile points likely used with a bow, alongside remains of small, agile rainforest animals like monkeys and squirrels. This is significant because it shows that early modern humans adapted sophisticated hunting technologies to dense tropical forest environments far earlier than previously thought, challenging models that focus exclusively on African or European evidence for behavioral modernity." },
+
+  // Agriculture
+  { num:26, name:"Neolithic Revolution vs. Neolithic Transition", section:"Agriculture",
+    simple:"'Revolution' (Childe's term) = sudden dramatic shift to farming. 'Transition' = the modern view: a slow, patchy, multi-millennium process of adopting domesticated plants and animals.",
+    detail:"V. Gordon Childe coined 'Neolithic Revolution' in the 1930s to describe what he saw as a sudden, transformative shift to farming that triggered civilization. Modern archaeology has overturned this: the shift to agriculture was slow (thousands of years), geographically variable, and often reversible. Many groups practiced a mix of foraging and cultivation for millennia. 'Neolithic Transition' better captures the gradual, complex reality, and acknowledges that agriculture arose independently in multiple regions (Fertile Crescent, China, Mesoamerica, etc.)." },
+
+  { num:27, name:"Domestication", section:"Agriculture",
+    simple:"The process by which humans selectively breed wild plants or animals over generations, resulting in genetic changes that make them more useful (e.g., larger seeds, docile behavior).",
+    detail:"Domestication is a co-evolutionary process — both the organism and human society change. In plants, domestication typically selects for non-shattering seed heads (seeds stay on the plant), larger seeds, and synchronized ripening. In animals, it selects for reduced aggression, smaller body size, altered reproductive cycles, and tolerance of humans. Domestication leaves archaeological signals: morphological changes visible in seeds and bones, geographic spread beyond a plant/animal's natural range, and shifts in age/sex ratios in faunal assemblages." },
+
+  { num:28, name:"Agriculture", section:"Agriculture",
+    simple:"A food production system based on the deliberate cultivation of domesticated plants and/or herding of domesticated animals.",
+    detail:"Agriculture transformed human history more than perhaps any other development: it enabled population growth, sedentism, food surpluses, occupational specialization, social hierarchy, and eventually states and cities. However, early agriculturalists were often less healthy than foragers (narrower diet, more infectious disease from dense living, harder physical labor). Agriculture arose independently at least 7–10 times globally, suggesting it was a response to widespread pressures (population growth, climate change, resource depletion) rather than a single invention." },
+
+  { num:29, name:"Sedentism", section:"Agriculture",
+    simple:"Living in permanent or semi-permanent settlements rather than moving seasonally. Often linked to agriculture but can predate it.",
+    detail:"Sedentism is often assumed to follow from agriculture, but the relationship is more complex. Some groups (like the Natufians of the Levant) became sedentary before agriculture, sustained by abundant wild resources. Conversely, some early farmers remained semi-mobile. Sedentism has major consequences: it enables accumulation of material goods, supports population growth (shorter birth spacing), creates waste management problems (disease), and allows for investment in permanent architecture. It also facilitates social inequality by enabling resource hoarding." },
+
+  { num:30, name:"Hierarchy", section:"Agriculture",
+    simple:"A ranked social structure where some individuals or groups hold more power, wealth, or prestige than others — increasingly common after the rise of agriculture.",
+    detail:"Hierarchy can be social (status differences), economic (wealth differences), or political (power differences). In band societies, hierarchy is minimal and often situational. Agriculture enables surplus production, which can be stored and controlled — the foundation of economic hierarchy. Sedentism enables inheritance of property. Together, these create conditions for persistent, institutionalized inequality. Archaeologically, hierarchy is visible in differential burial wealth, monumental architecture, and unequal distributions of prestige goods across sites." },
+
+  { num:31, name:"Abu Hureyra, Syria", section:"Agriculture",
+    simple:"A key site in Syria showing the transition from foraging to farming (~13,000–7,000 BP). Contains some of the earliest evidence of rye cultivation and later full-scale agriculture.",
+    detail:"Abu Hureyra is one of the most important sites for studying the origins of agriculture in the Fertile Crescent. It was occupied across a critical period: early layers show a large foraging community exploiting wild grains and gazelle; middle layers document the cultivation of rye (among the earliest known); later layers show a fully agricultural village with wheat, barley, lentils, and sheep/goat herding. The skeletal remains also show evidence of intense physical labor associated with grinding grain (arthritis, spinal compression, toe deformities from kneeling)." },
+
+  { num:32, name:"Sannai-Maruyama, Japan", section:"Agriculture",
+    simple:"A large Jomon culture site in Japan (~5,500–4,000 BP) showing that complex, sedentary society with monumental architecture is possible without full agriculture.",
+    detail:"Sannai-Maruyama challenges the assumption that sedentism and social complexity require agriculture. The Jomon people here maintained a large, long-occupied village with massive wooden pillar structures, long-distance trade networks, and elaborate material culture — all sustained by intensive fishing, hunting, and gathering, with some plant management. It is a powerful counterexample: complexity does not always require farming, and the relationship between sedentism, agriculture, and social hierarchy is not deterministic." },
+
+  { num:33, name:"Çatalhöyük, Turkey", section:"Agriculture",
+    simple:"A large Neolithic town in Anatolia (~9,500–7,700 BP) with densely packed mud-brick houses, elaborate wall art, and unusual burial practices (dead buried under floors). A key site for early urban life.",
+    detail:"Çatalhöyük (often mistakenly listed as Syria on study guides — it's in Turkey) is one of the world's earliest and largest Neolithic settlements, housing perhaps 3,000–8,000 people. Houses had no doors — entry was through the roof. The dead were buried beneath sleeping platforms. Walls were plastered and painted with elaborate scenes of hunting and animals. Remarkably, isotopic and skeletal analysis suggests relatively egalitarian social organization despite the site's size, challenging models that link large settlements automatically to hierarchy." },
+
+  // Technology
+  { num:34, name:"Stone Tools", section:"Technology",
+    simple:"Tools made by shaping stone — the most durable and common artifacts in the archaeological record. Range from simple flakes to finely shaped points and blades.",
+    detail:"Stone tools are the cornerstone of prehistoric archaeology. Because stone is virtually indestructible, lithic assemblages survive when organic materials do not, providing an unbroken record of human technology stretching back 3.3 million years (Lomekwian tools, Kenya). Archaeologists analyze tool types, raw material sourcing, manufacturing techniques, and use-wear patterns to reconstruct technology, cognition, trade networks, and subsistence strategies. Different tool traditions define major archaeological periods and cultures." },
+
+  { num:35, name:"Reductive Technology", section:"Technology",
+    simple:"A tool-making approach where material is removed (reduced) from a core to create a tool or flake — the basis of most stone tool production.",
+    detail:"Reductive technology is the defining feature of lithic tool production: you start with a large piece of stone (the core) and systematically remove flakes until you achieve the desired shape. This contrasts with additive technology (like pottery or metallurgy) where material is added or transformed. Understanding reduction sequences (chaîne opératoire) — the planned series of steps taken to produce a tool — reveals cognitive complexity, planning, and skill. The flakes, cores, and debris (debitage) left behind document the entire production process." },
+
+  { num:36, name:"Percussion Flaking", section:"Technology",
+    simple:"A stone tool technique where a hammer (stone, bone, or antler) strikes a core to detach flakes. The most fundamental lithic reduction method.",
+    detail:"Percussion flaking comes in two main forms: direct percussion (striking the core directly with a hammerstone) and indirect percussion (using a punch/intermediary between the hammer and core for more control). Pressure flaking — pressing a pointed tool against the edge to detach tiny, precise flakes — is a related but distinct technique used for fine finishing. The choice of technique, raw material, and reduction sequence reflects both available resources and the knapper's skill and intent." },
+
+  { num:37, name:"Ground Stone", section:"Technology",
+    simple:"Stone tools shaped by grinding and abrading rather than flaking — including mortars, pestles, and grinding stones. Associated with processing plant foods.",
+    detail:"Ground stone technology appears widely with intensified plant use and agriculture. Mortars and pestles crush seeds and pigments; grinding stones (manos and metates) process grain into flour. Ground stone tools are heavier and less portable than flaked tools, reflecting more sedentary lifestyles. Their presence indicates substantial investment in plant food processing, and use-wear analysis can identify what substances were ground. Ground stone also includes ground stone axes, which were important for forest clearance in early farming communities." },
+
+  { num:38, name:"Clay", section:"Technology",
+    simple:"A fine-grained, plastic material that can be shaped when wet and hardened by firing. The raw material for pottery and early construction.",
+    detail:"Clay's plasticity when wet and hardness when fired make it one of the most versatile materials in human technology. Before pottery, clay was used for figurines, building (mud brick), and lining storage pits. The shift to fired pottery transformed food storage, cooking, and transport. Clay's composition varies geographically, so chemical and mineralogical analysis of pottery clay can trace where vessels were made — a powerful tool for studying trade and movement." },
+
+  { num:39, name:"Temper", section:"Technology",
+    simple:"Material (sand, shell, grit, fiber) added to clay before firing to prevent cracking and control how the vessel behaves during drying and firing.",
+    detail:"Temper is critical to pottery production: without it, clay vessels crack during the drying and firing process due to uneven shrinkage. Different cultures used different tempering agents — crushed shell, sand, grog (ground-up old pottery), plant fiber, or volcanic ash. The type of temper is culturally specific and can serve as a fingerprint for identifying pottery traditions and production centers. Temper analysis is a key part of ceramic petrography." },
+
+  { num:40, name:"Pottery", section:"Technology",
+    simple:"Fired clay vessels used for cooking, storage, and transport. One of the most common and informative artifact types in archaeology.",
+    detail:"Pottery is transformative technology: it enabled boiling (improving food digestibility and safety), long-term storage of liquids and grains, and transport of goods. Pottery styles change rapidly over time and vary geographically, making ceramics excellent chronological and cultural markers. Pottery analysis includes typology, temper identification, residue analysis (what was stored or cooked), and sourcing studies. Notably, pottery was invented independently in multiple regions and appears before agriculture in some contexts (e.g., Jomon Japan, ~16,000 BP)." },
+
+  { num:41, name:"Ceramics", section:"Technology",
+    simple:"The broader category of fired clay objects, including pottery, figurines, tiles, and bricks — not limited to vessels.",
+    detail:"While pottery refers specifically to clay vessels, ceramics encompasses all fired clay objects. This includes figurines (some of the earliest known, >25,000 years old), architectural elements (mud brick, tile), pipes, spindle whorls, and loom weights. The distinction matters analytically: a site's ceramic assemblage includes all these categories, each providing different information about technology, economy, ritual, and daily life. Ceramic analysis is one of the richest data sources in archaeology." },
+
+  { num:42, name:"Pyrotechnology", section:"Technology",
+    simple:"The controlled use of fire to transform materials — including pottery firing, smelting, and food preparation. A fundamental human technological capability.",
+    detail:"Pyrotechnology extends far beyond simply making fire. The ability to control temperature and atmosphere in a fire allowed humans to harden clay into ceramics, extract metals from ores, produce lime plaster, and process food in new ways. Each application requires understanding of fuel, airflow, and temperature — knowledge built up over generations. The development of high-temperature pyrotechnology (kilns, furnaces) was a prerequisite for metallurgy and industrial-scale pottery production." },
+
+  { num:43, name:"Smelting", section:"Technology",
+    simple:"The process of heating ore to extract pure metal. A key step in metallurgy requiring high-temperature pyrotechnology (>700°C for copper).",
+    detail:"Smelting is the defining step between cold-working native metals (hammering naturally occurring copper or gold) and true metallurgy. It requires ore recognition, fuel management, and often the use of bellows to achieve sufficient temperatures and controlled atmospheres. Copper smelting appears by ~5,000 BCE in the Near East; bronze (copper + tin) followed, then iron. Smelting slag — the waste byproduct — is an important archaeological indicator of metal production at a site even when finished objects are absent." },
+
+  { num:44, name:"Metallurgy", section:"Technology",
+    simple:"The technology of extracting, alloying, and working metals — transforming ore into copper, bronze, iron, and gold objects. Marks major shifts in tool production and social complexity.",
+    detail:"Metallurgy is far more than making metal tools. It requires specialist knowledge, access to ore sources, trade networks for materials, and significant investment in infrastructure (furnaces, bellows, molds). Metal objects are durable, recyclable, and can carry symbolic value beyond utility. The Bronze Age and Iron Age are defined by metallurgy because metal tools and weapons transformed warfare, agriculture, and craft production. Control of metal production and distribution is often linked to the emergence of elite classes and state societies." },
+
+  // Trade
+  { num:45, name:"Characterization", section:"Trade",
+    simple:"Scientific analysis of an artifact's physical or chemical composition to determine its raw material source — used to trace trade routes.",
+    detail:"Characterization (or sourcing) studies use techniques like X-ray fluorescence (XRF), neutron activation analysis, and isotope analysis to create chemical 'fingerprints' of artifact materials. These fingerprints can be matched to known geological or geological sources. Famous examples: obsidian from specific volcanic sources has a unique chemical signature; marble can be traced to specific quarries; lead isotopes in bronze objects can identify where the tin or lead was mined. Characterization is essential for reconstructing prehistoric trade networks." },
+
+  { num:46, name:"Commodity", section:"Trade",
+    simple:"A good traded for its practical use value — food, raw materials, tools. Traded based on function rather than social meaning.",
+    detail:"Commodities are the utilitarian side of exchange. They include staple goods like grain, pottery, and raw materials. Understanding what moved as commodities versus prestige goods reveals the structure of an economy: were people trading to meet basic needs, or to accumulate social capital? In practice, the same object can function as both — a fine ceramic vessel might be a commodity in one context and a prestige good in another depending on who receives it and what social meaning is attached." },
+
+  { num:47, name:"Prestige Good", section:"Trade",
+    simple:"A rare or exotic item traded for its social value rather than utility — used to signal status, cement alliances, or mark special occasions (e.g., gold, exotic shells, obsidian blades).",
+    detail:"Prestige goods are central to understanding social hierarchy in archaeology. Elites typically control access to exotic or rare materials, using them to display status and reinforce social distinctions. The presence of prestige goods far from their origin (e.g., Mediterranean shells in inland Europe) indicates long-distance exchange networks. Critically, prestige goods often end up in burials rather than trash deposits, because their social value makes them worth burying with the dead rather than discarding." },
+
+  { num:48, name:"Exchange", section:"Trade",
+    simple:"The transfer of goods, services, or information between individuals or groups. Includes gift-giving, reciprocity, and trade — not always economic.",
+    detail:"Exchange is broader than trade. Anthropologists distinguish several modes: reciprocal exchange (gift-giving between equals, creating social bonds), redistributive exchange (goods flow to a central authority and are redistributed, as in chiefdoms), and market exchange (goods traded based on supply and demand). In archaeology, exchange is reconstructed from the distribution of non-local materials. Understanding the mode of exchange helps reconstruct social relationships — was material moving between equals, or from subordinate to dominant groups?" },
+
+  { num:49, name:"Trade", section:"Trade",
+    simple:"The exchange of goods between parties, typically involving some form of value equivalence. Implies a more formalized or economic relationship than gift exchange.",
+    detail:"Trade implies a relatively impersonal exchange focused on material value, distinct from gift exchange (which creates social bonds and obligations). Evidence for prehistoric trade includes the presence of non-local raw materials, finished goods far from their production sites, and standardized weights and measures. Long-distance trade networks existed far earlier than once thought — obsidian from Anatolia was traded across hundreds of kilometers in the Neolithic, and marine shells traveled thousands of kilometers inland throughout prehistory." },
+
+  { num:50, name:"Interaction Sphere", section:"Trade",
+    simple:"A broad network of exchange connecting multiple societies across a large region, sharing prestige goods and cultural practices (e.g., the Hopewell Interaction Sphere of North America).",
+    detail:"The concept of interaction sphere was developed largely through study of the Hopewell culture (100 BCE–500 CE) in eastern North America, where exotic materials (obsidian from Yellowstone, copper from the Great Lakes, shells from the Gulf Coast) moved across thousands of miles through exchange networks. Interaction spheres don't imply a single unified culture — societies within the network remain distinct — but they share prestige goods and iconographic styles that signal participation in a broader social world. Identifying interaction spheres helps map prehistoric connectivity." },
+
+  { num:51, name:"Varna Necropolis, Bulgaria", section:"Trade",
+    simple:"A ~6,500-year-old cemetery in Bulgaria containing the oldest known significant gold artifacts in the world, with extremely unequal burial wealth — key evidence for early social hierarchy and long-distance trade.",
+    detail:"Varna is one of the most important sites for understanding the emergence of social complexity in prehistoric Europe. The cemetery contains over 300 graves with dramatically different wealth: some individuals buried with thousands of gold objects (including a solid gold penis sheath), copper tools, and Spondylus shell ornaments from the Aegean; others buried with nothing. The gold objects are the oldest significant worked gold in the world (~4,600–4,200 BCE). The unequal distribution of grave goods signals entrenched social hierarchy, and the exotic materials document extensive long-distance trade networks across prehistoric Europe." }
+];
+
+const sectionColors = {
+  "Social Organization": "social",
+  "Environmental Archaeology": "env",
+  "Food": "food",
+  "Agriculture": "agri",
+  "Technology": "tech",
+  "Trade": "trade"
+};
+
+let mode = 'both';
+
+function setMode(m) {
+  mode = m;
+  ['both','simple','detail'].forEach(id => {
+    document.getElementById('btn-'+id).classList.toggle('active', id === m);
+  });
+  render();
+}
+
+function render() {
+  const section = document.getElementById('sectionFilter').value;
+  const search = document.getElementById('searchBox').value.toLowerCase().trim();
+  const out = document.getElementById('output');
+
+  const filtered = terms.filter(t => {
+    const matchSection = section === 'all' || t.section === section;
+    const matchSearch = !search || t.name.toLowerCase().includes(search) || t.simple.toLowerCase().includes(search) || t.detail.toLowerCase().includes(search);
+    return matchSection && matchSearch;
+  });
+
+  document.getElementById('countLabel').textContent = filtered.length + ' term' + (filtered.length !== 1 ? 's' : '');
+
+  if (filtered.length === 0) {
+    out.innerHTML = '<div class="no-results">No terms match your search.</div>';
+    return;
+  }
+
+  const sections = [...new Set(filtered.map(t => t.section))];
+  let html = '';
+
+  sections.forEach(sec => {
+    const secTerms = filtered.filter(t => t.section === sec);
+    html += `<div class="section-header">${sec}</div>`;
+    secTerms.forEach(t => {
+      const badgeClass = sectionColors[t.section];
+      html += `<div class="term-card">
+        <div class="card-top">
+          <span class="num">${t.num}.</span>
+          <span class="name">${t.name}</span>
+          <span class="badge ${badgeClass}">${t.section}</span>
+        </div>`;
+
+      if (mode === 'both' || mode === 'simple') {
+        html += `<div class="def-block simple-block">
+          <div class="def-label">Notecard</div>
+          ${t.simple}
+        </div>`;
+      }
+      if (mode === 'both' || mode === 'detail') {
+        html += `<div class="def-block detail-block">
+          <div class="def-label">Detailed</div>
+          ${t.detail}
+        </div>`;
+      }
+
+      html += `</div>`;
+    });
+  });
+
+  out.innerHTML = html;
+}
+
+render();
+</script>
+</body>
+</html>
